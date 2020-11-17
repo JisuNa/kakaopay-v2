@@ -1,0 +1,47 @@
+package kakaopay.sprinkle.controller;
+
+import kakaopay.sprinkle.dto.SprinkleRequest;
+import kakaopay.sprinkle.service.SprinkleService;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigInteger;
+
+@RestController
+@RequestMapping("/api/v2/sprinkle")
+@RequiredArgsConstructor
+public class SprinkleController {
+
+    private final SprinkleService sprinkleService;
+
+    @PostMapping("")
+    public ResponseEntity<?> sprinkle(@RequestHeader(value = "X-USER-ID") BigInteger userId,
+                                      @RequestHeader(value = "X-ROOM-ID") BigInteger roomId,
+                                      @RequestBody SprinkleRequest sprinkleRequest) {
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(sprinkleService.sprinkle(userId, roomId, sprinkleRequest));
+    }
+
+    @PatchMapping("")
+    public ResponseEntity<?> receive(@RequestHeader(value = "X-USER-ID") BigInteger userId,
+                                     @RequestHeader(value = "X-ROOM-ID") BigInteger roomId,
+                                     @RequestHeader(value = "TOKEN") String token) {
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(sprinkleService.receive(userId, roomId, token));
+    }
+
+    @GetMapping("/check")
+    public ResponseEntity<?> check(@RequestHeader(value = "X-ROOM-ID") BigInteger roomId,
+                                   @RequestHeader(value = "TOKEN") String token) {
+
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(sprinkleService.check(roomId, token));
+    }
+
+}
