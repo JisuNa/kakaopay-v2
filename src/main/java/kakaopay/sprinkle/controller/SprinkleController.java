@@ -1,5 +1,6 @@
 package kakaopay.sprinkle.controller;
 
+import kakaopay.sprinkle.dto.ApiResponse;
 import kakaopay.sprinkle.dto.SprinkleRequest;
 import kakaopay.sprinkle.service.SprinkleService;
 import lombok.NonNull;
@@ -18,30 +19,36 @@ public class SprinkleController {
     private final SprinkleService sprinkleService;
 
     @PostMapping("")
-    public ResponseEntity<?> sprinkle(@RequestHeader(value = "X-USER-ID") BigInteger userId,
-                                      @RequestHeader(value = "X-ROOM-ID") BigInteger roomId,
+    public ResponseEntity<?> sprinkle(@RequestHeader(value = "X-USER-ID") Long userId,
+                                      @RequestHeader(value = "X-ROOM-ID") Long roomId,
                                       @RequestBody SprinkleRequest sprinkleRequest) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(sprinkleService.sprinkle(userId, roomId, sprinkleRequest));
+                .body(
+                        ApiResponse.success(sprinkleService.setSprinkle(userId, roomId, sprinkleRequest))
+                );
     }
 
     @PatchMapping("")
-    public ResponseEntity<?> receive(@RequestHeader(value = "X-USER-ID") BigInteger userId,
-                                     @RequestHeader(value = "X-ROOM-ID") BigInteger roomId,
+    public ResponseEntity<?> receive(@RequestHeader(value = "X-USER-ID") Long userId,
+                                     @RequestHeader(value = "X-ROOM-ID") Long roomId,
                                      @RequestHeader(value = "TOKEN") String token) {
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(sprinkleService.receive(userId, roomId, token));
+                .body(
+                        ApiResponse.success(sprinkleService.receive(userId, roomId, token))
+                );
     }
 
-    @GetMapping("/check")
-    public ResponseEntity<?> check(@RequestHeader(value = "X-ROOM-ID") BigInteger roomId,
+    @GetMapping("")
+    public ResponseEntity<?> check(@RequestHeader(value = "X-ROOM-ID") Long roomId,
                                    @RequestHeader(value = "TOKEN") String token) {
 
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(sprinkleService.check(roomId, token));
+                .body(
+                        ApiResponse.success(sprinkleService.check(roomId, token))
+                );
     }
 
 }

@@ -1,4 +1,4 @@
-package kakaopay.sprinkle.util;
+package kakaopay.sprinkle.common.util;
 
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.RandomStringUtils;
