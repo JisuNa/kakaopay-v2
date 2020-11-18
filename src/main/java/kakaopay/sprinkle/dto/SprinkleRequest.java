@@ -10,19 +10,17 @@ import java.math.BigInteger;
 @NoArgsConstructor
 public class SprinkleRequest {
 
-    private BigInteger userId;
-    private String roomId;
-    private String token;
     private int amount;
     private int numberOfRecipients;
 
-    @Builder
-    public SprinkleRequest(BigInteger userId, String roomId, String token, int amount, int numberOfRecipients, String status) {
-        this.userId = userId;
-        this.roomId = roomId;
-        this.token = token;
-        this.amount = amount;
-        this.numberOfRecipients = numberOfRecipients;
-    }
+    // Todo 필요없으면 삭제
+//    @Builder
+//    public SprinkleRequest(BigInteger userId, String roomId, String token, int amount, int numberOfRecipients) {
+//        this.userId = userId;
+//        this.roomId = roomId;
+//        this.token = token;
+//        this.amount = amount;
+//        this.numberOfRecipients = numberOfRecipients;
+//    }
 
 }

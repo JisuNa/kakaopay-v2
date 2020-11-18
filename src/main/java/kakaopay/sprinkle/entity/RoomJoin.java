@@ -15,9 +15,9 @@ import javax.persistence.Table;
 public class RoomJoin extends BaseEntity {
 
     @Column(name = "room_id", nullable = false)
-    private String roomId;
+    private Long roomId;
 
     @Column(name = "user_id", nullable = false)
-    private String userId;
+    private Long userId;
 
 }

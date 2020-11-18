@@ -25,7 +25,7 @@ public class SprinkleController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(
-                        ApiResponse.success(sprinkleService.setSprinkle(userId, roomId, sprinkleRequest))
+                        ApiResponse.success(sprinkleService.newSprinkle(userId, roomId, sprinkleRequest))
                 );
     }
 

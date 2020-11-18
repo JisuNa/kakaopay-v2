@@ -1,6 +1,7 @@
 package kakaopay.sprinkle.entity;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -32,8 +33,17 @@ public class Sprinkle extends BaseEntity {
     @Column(name = "sprayed_amount")
     private int sprayedAmount;
 
-    @Column(name = "token_id", nullable = false)
-    private Long tokenId;
+    @Column(name = "token", nullable = false)
+    private String token;
+
+    @Builder
+    public Sprinkle(Long roomId, Long userId, int amount, int numberOfRecipients, String token) {
+        this.roomId = roomId;
+        this.userId = userId;
+        this.amount = amount;
+        this.numberOfRecipients = numberOfRecipients;
+        this.token = token;
+    }
 
 //    @OneToOne(mappedBy = "token")
 //    private Token token;
