@@ -13,16 +13,12 @@ import java.time.LocalDateTime;
 @EntityListeners({AuditingEntityListener.class})
 public abstract class BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @CreatedDate
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
 }

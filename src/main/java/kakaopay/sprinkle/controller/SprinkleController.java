@@ -38,9 +38,17 @@ public class SprinkleController {
     @GetMapping("")
     public ResponseEntity<?> check(@RequestHeader(value = "TOKEN") String token) {
 
-
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success(sprinkleService.check(token))
+        );
+    }
+
+    // Todo 삭제
+    @GetMapping("/test")
+    public ResponseEntity<?> test(@RequestHeader(value = "TOKEN") String token) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ApiResponse.success(sprinkleService.test(token))
         );
     }
 

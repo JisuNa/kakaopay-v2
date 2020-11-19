@@ -4,16 +4,22 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "SPRINKLE")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Sprinkle extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "sprinkle_id")
+    private Long id;
 
     @Column(name = "room_id", nullable = false)
     private Long roomId;
@@ -28,6 +34,7 @@ public class Sprinkle extends BaseEntity {
     private int numberOfRecipients;
 
     @Column(name = "status")
+    @ColumnDefault("PROCESSING")
     private String status;
 
     @Column(name = "sprayed_amount")
@@ -45,10 +52,12 @@ public class Sprinkle extends BaseEntity {
         this.token = token;
     }
 
-//    @OneToOne(mappedBy = "token")
-//    private Token token;
-//
-//    @OneToMany(fetch = FetchType.EAGER, mappedBy = "skprinkle")
-//    private List<Receive> receiveList = new ArrayList<>();
+    public void updateStatus(String status) {
+        this.status = status;
+    }
+
+    @OneToMany(mappedBy = "sprinkle")
+    @OrderBy("id desc")
+    private List<Receive> receiveList = new ArrayList<>();
 
 }

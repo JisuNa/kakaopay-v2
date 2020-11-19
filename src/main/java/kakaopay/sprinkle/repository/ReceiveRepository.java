@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface ReceiveRepository extends JpaRepository<Receive, Long> {
     Optional<Receive> findByIdAndUserId(Long id, Long userId);
 
+    Optional<Receive> findBySprinkleIdAndUserId(Long sprinkleId, Long userId);
 }

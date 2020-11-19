@@ -1,19 +1,23 @@
 package kakaopay.sprinkle.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "RECEIVE")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Receive extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "receive_id")
+    private Long id;
 
     @Column(name = "user_id")
     private Long userId;
@@ -30,7 +34,13 @@ public class Receive extends BaseEntity {
         this.sprinkleId = sprinkleId;
     }
 
-//    @ManyToOne
-//    @JoinColumn
+    public void updateUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "sprinkle_id", insertable = false, updatable = false)
+    private Sprinkle sprinkle;
 
 }

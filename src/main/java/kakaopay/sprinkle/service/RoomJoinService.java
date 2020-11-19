@@ -17,8 +17,8 @@ public class RoomJoinService {
     public void isJoinedUser(Long userId, Long roomId) {
         Optional<RoomJoin> roomJoin = roomJoinRepository.findByUserIdAndRoomId(userId, roomId);
 
-        roomJoin.orElseThrow(
-                () -> new EmptyInfoException("해당유저는 채팅방에 참여하지 않았습니다.")
+        roomJoin.orElseThrow(()
+                -> new EmptyInfoException("해당유저는 채팅방에 참여하지 않았습니다.")
         );
     }
 
