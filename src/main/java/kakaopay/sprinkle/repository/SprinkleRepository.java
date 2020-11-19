@@ -9,4 +9,5 @@ public interface SprinkleRepository extends JpaRepository<Sprinkle, Long> {
 
     Sprinkle findByRoomId(long roomId);
 
+    Optional<Sprinkle> findByToken(String token);
 }

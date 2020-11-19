@@ -1,11 +1,10 @@
 package kakaopay.sprinkle.service;
 
+import kakaopay.sprinkle.common.error.exception.ReceiveFailedException;
 import kakaopay.sprinkle.entity.Receive;
 import kakaopay.sprinkle.repository.ReceiveRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
 
 /**
  * 받기
@@ -21,10 +20,10 @@ public class ReceiveService {
     private final ReceiveRepository receiveRepository;
 
     /**
-     * 뿌리기 받기 초기값 설정
+     * 받기 초기값 설정
      *
-     * @param sprinkleId 뿌리기 식별값
-     * @param amount 뿌리기 전체금액
+     * @param sprinkleId         뿌리기 식별값
+     * @param amount             뿌리기 전체금액
      * @param numberOfRecipients 뿌리기 받는 인원 수
      */
     public void initReceiveInfo(long sprinkleId, int amount, int numberOfRecipients) {
@@ -53,14 +52,20 @@ public class ReceiveService {
 
     }
 
+    public void checkAlreadyReceive(Long id, Long userId) {
+        receiveRepository.findByIdAndUserId(id, userId).orElseThrow(
+                () -> new ReceiveFailedException("해당 유저는 이미 받기를 했습니다.")
+        );
+    }
+
     /**
-     * 받기 분
+     * 받기 분할
      *
      * @param remainAmount 남은금액
      * @return 받기 분할된 금액
      */
     private int splitReceiveAmount(int remainAmount) {
-        return (int)(Math.random() * remainAmount)+1;
+        return (int) (Math.random() * remainAmount) + 1;
     }
 
 }

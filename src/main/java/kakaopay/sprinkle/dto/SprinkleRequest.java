@@ -1,10 +1,7 @@
 package kakaopay.sprinkle.dto;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.math.BigInteger;
 
 @Getter
 @NoArgsConstructor
