@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -38,6 +37,9 @@ public class Sprinkle extends BaseEntity {
 
     @Column(name = "token", nullable = false)
     private String token;
+    @OneToMany(mappedBy = "sprinkle")
+    @OrderBy("id desc")
+    private List<Receive> receiveList = new ArrayList<>();
 
     @Builder
     public Sprinkle(Long roomId, Long userId, int amount, int numberOfRecipients, String token) {
@@ -47,9 +49,5 @@ public class Sprinkle extends BaseEntity {
         this.numberOfRecipients = numberOfRecipients;
         this.token = token;
     }
-
-    @OneToMany(mappedBy = "sprinkle")
-    @OrderBy("id desc")
-    private List<Receive> receiveList = new ArrayList<>();
 
 }

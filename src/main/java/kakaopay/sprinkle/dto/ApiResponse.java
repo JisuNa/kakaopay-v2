@@ -16,7 +16,7 @@ public class ApiResponse {
      *
      * @param code 응답 코드
      * @param data 내용
-     * @return c
+     * @return {@link ApiResponse}
      */
     public static ApiResponse of(Code code, Object data) {
         return new ApiResponse(code.getCode(), data);

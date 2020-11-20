@@ -2,7 +2,6 @@ package kakaopay.sprinkle.controller;
 
 import kakaopay.sprinkle.dto.ApiResponse;
 import kakaopay.sprinkle.dto.SprinkleRequest;
-import kakaopay.sprinkle.service.ReceiveService;
 import kakaopay.sprinkle.service.SprinkleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,12 +14,11 @@ import org.springframework.web.bind.annotation.*;
 public class SprinkleController {
 
     private final SprinkleService sprinkleService;
-    private final ReceiveService receiveService;
 
     @PostMapping("")
-    public ResponseEntity<?> sprinkle(@RequestHeader(value = "X-USER-ID") Long userId,
-                                      @RequestHeader(value = "X-ROOM-ID") Long roomId,
-                                      @RequestBody SprinkleRequest sprinkleRequest) {
+    public ResponseEntity<ApiResponse> sprinkle(@RequestHeader(value = "X-USER-ID") Long userId,
+                                                @RequestHeader(value = "X-ROOM-ID") Long roomId,
+                                                @RequestBody SprinkleRequest sprinkleRequest) {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ApiResponse.success(sprinkleService.newSprinkle(userId, roomId, sprinkleRequest))
@@ -28,29 +26,21 @@ public class SprinkleController {
     }
 
     @PatchMapping("")
-    public ResponseEntity<?> receive(@RequestHeader(value = "X-USER-ID") Long userId,
-                                     @RequestHeader(value = "X-ROOM-ID") Long roomId,
-                                     @RequestHeader(value = "TOKEN") String token) {
+    public ResponseEntity<ApiResponse> receive(@RequestHeader(value = "X-USER-ID") Long userId,
+                                               @RequestHeader(value = "X-ROOM-ID") Long roomId,
+                                               @RequestHeader(value = "TOKEN") String token) {
 
         return ResponseEntity.status(HttpStatus.OK).body(
-                ApiResponse.success(receiveService.receive(userId, roomId, token))
+                ApiResponse.success(sprinkleService.receive(userId, roomId, token))
         );
     }
 
     @GetMapping("")
-    public ResponseEntity<?> check(@RequestHeader(value = "TOKEN") String token) {
+    public ResponseEntity<ApiResponse> inquiry(@RequestHeader(value = "X-USER-ID") Long userId,
+                                               @RequestHeader(value = "TOKEN") String token) {
 
         return ResponseEntity.status(HttpStatus.OK).body(
-                ApiResponse.success(sprinkleService.check(token))
-        );
-    }
-
-    // Todo 삭제
-    @GetMapping("/test")
-    public ResponseEntity<?> test(@RequestHeader(value = "TOKEN") String token) {
-
-        return ResponseEntity.status(HttpStatus.OK).body(
-                ApiResponse.success(sprinkleService.test(token))
+                ApiResponse.success(sprinkleService.inquiry(userId, token))
         );
     }
 

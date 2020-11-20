@@ -27,6 +27,10 @@ public class Receive extends BaseEntity {
 
     @Column(name = "sprinkle_id", nullable = false)
     private Long sprinkleId;
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "sprinkle_id", insertable = false, updatable = false)
+    private Sprinkle sprinkle;
 
     @Builder
     public Receive(int amount, Long sprinkleId) {
@@ -37,10 +41,5 @@ public class Receive extends BaseEntity {
     public void updateUserId(Long userId) {
         this.userId = userId;
     }
-
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "sprinkle_id", insertable = false, updatable = false)
-    private Sprinkle sprinkle;
 
 }
