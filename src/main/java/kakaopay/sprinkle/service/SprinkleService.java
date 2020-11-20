@@ -42,7 +42,7 @@ public class SprinkleService {
     @Transactional
     public String newSprinkle(Long userId, Long roomId, SprinkleRequest sprinkleRequest) {
 
-        roomJoinService.isJoinedUser(userId, roomId);
+        roomJoinService.checkJoinedUser(userId, roomId);
 
         String token = TokenUtil.generate();
 
@@ -59,34 +59,22 @@ public class SprinkleService {
         return token;
     }
 
-    /**
-     * 받기 할당
-     *
-     * @param userId 유저 식별값
-     * @param roomId 채팅방 식별값
-     * @param token  토큰 값
-     * @return {@link ReceiveResponse}
-     */
-    @Transactional
-    public ReceiveResponse receive(Long userId, Long roomId, String token) {
+    public Sprinkle getSprinkleByToken(String token) {
 
-        // 받기 요청한 유저가 같은방에 있는지
-        roomJoinService.isJoinedUser(userId, roomId);
+        return sprinkleRepository.findByToken(token).orElseThrow(()
+                -> new EmptyInfoException("해당 토큰의 뿌리기 데이터가 존재하지 않습니다.")
+        );
+    }
 
-        // token으로 뿌리기 데이터 조회
-        Sprinkle sprinkle = getSprinkleByToken(token);
+    public void checkCanReceive(long userId, long roomId, Sprinkle sprinkle) {
 
-        // 받기 가능한지 검사
-        checkCanReceive(userId, roomId, sprinkle);
-
-        // 받기 유저 지정
-        int receiveAmount = receiveService.setReceiverProcess(sprinkle.getReceiveList(), userId);
-
-        if (receiveAmount == 0) {
-            throw new ReceiveFailedException("해당 뿌리기는 받을 수 있는 금액이 없습니다.");
+        // 뿌리기한 사람이 요청한건지
+        if (sprinkle.getUserId() == userId) {
+            throw new ReceiveFailedException("뿌리기를 한 사람은 받기를 할 수 없습니다.");
         }
 
-        return new ReceiveResponse(userId, receiveAmount);
+        // 뿌리기하고 10분이 지났는지
+        checkExpired(sprinkle.getCreatedAt(), 10);
     }
 
     public Sprinkle check(String token) {
@@ -96,39 +84,9 @@ public class SprinkleService {
         );
     }
 
-    private void completeSprinkle(Sprinkle completedSprinkle) {
-
-        completedSprinkle.updateStatus("COMPLETE");
-        sprinkleRepository.save(completedSprinkle);
-    }
-
-    private Sprinkle getSprinkleByToken(String token) {
-
-        return sprinkleRepository.findByToken(token).orElseThrow(()
-                -> new EmptyInfoException("해당 토큰의 뿌리기 데이터가 존재하지 않습니다.")
-        );
-    }
-
-    private void checkCanReceive(long userId, long roomId, Sprinkle sprinkle) {
-
-        // 완료된 상태인지
-        if ("COMPLETE".equals(sprinkle.getStatus())) {
-            throw new ReceiveFailedException("해당 뿌리기는 이미 완료된 상태입니다.");
-        }
-
-        // 뿌리기한 사람이 요청한건지
-        if (sprinkle.getUserId() == userId) {
-            throw new ReceiveFailedException("뿌리기를 한 사람은 받기를 할 수 없습니다.");
-        }
-
-        // 뿌리기하고 10분이 지났는지
-        checkExpired(sprinkle.getCreatedAt(), 10);
-
-    }
-
     private void checkExpired(LocalDateTime createdAt, int min) {
 
-        if (60 * min < ChronoUnit.SECONDS.between(createdAt, LocalDateTime.now())) {
+        if (createdAt.isBefore(LocalDateTime.now().minusMinutes(min))) {
             throw new ReceiveFailedException("만료된 뿌리기 입니다.");
         }
     }

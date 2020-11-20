@@ -2,6 +2,7 @@ package kakaopay.sprinkle.controller;
 
 import kakaopay.sprinkle.dto.ApiResponse;
 import kakaopay.sprinkle.dto.SprinkleRequest;
+import kakaopay.sprinkle.service.ReceiveService;
 import kakaopay.sprinkle.service.SprinkleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class SprinkleController {
 
     private final SprinkleService sprinkleService;
+    private final ReceiveService receiveService;
 
     @PostMapping("")
     public ResponseEntity<?> sprinkle(@RequestHeader(value = "X-USER-ID") Long userId,
@@ -31,7 +33,7 @@ public class SprinkleController {
                                      @RequestHeader(value = "TOKEN") String token) {
 
         return ResponseEntity.status(HttpStatus.OK).body(
-                ApiResponse.success(sprinkleService.receive(userId, roomId, token))
+                ApiResponse.success(receiveService.receive(userId, roomId, token))
         );
     }
 

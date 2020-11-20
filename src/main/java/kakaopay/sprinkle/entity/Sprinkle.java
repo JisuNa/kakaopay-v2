@@ -33,10 +33,6 @@ public class Sprinkle extends BaseEntity {
     @Column(name = "number_of_recipients", nullable = false)
     private int numberOfRecipients;
 
-    @Column(name = "status")
-    @ColumnDefault("PROCESSING")
-    private String status;
-
     @Column(name = "sprayed_amount")
     private int sprayedAmount;
 
@@ -50,10 +46,6 @@ public class Sprinkle extends BaseEntity {
         this.amount = amount;
         this.numberOfRecipients = numberOfRecipients;
         this.token = token;
-    }
-
-    public void updateStatus(String status) {
-        this.status = status;
     }
 
     @OneToMany(mappedBy = "sprinkle")

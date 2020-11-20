@@ -14,7 +14,7 @@ public class RoomJoinService {
 
     private final RoomJoinRepository roomJoinRepository;
 
-    public void isJoinedUser(Long userId, Long roomId) {
+    public void checkJoinedUser(Long userId, Long roomId) {
         Optional<RoomJoin> roomJoin = roomJoinRepository.findByUserIdAndRoomId(userId, roomId);
 
         roomJoin.orElseThrow(()

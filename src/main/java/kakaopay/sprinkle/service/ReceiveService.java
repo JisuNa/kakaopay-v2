@@ -1,7 +1,9 @@
 package kakaopay.sprinkle.service;
 
 import kakaopay.sprinkle.common.error.exception.ReceiveFailedException;
+import kakaopay.sprinkle.dto.ReceiveResponse;
 import kakaopay.sprinkle.entity.Receive;
+import kakaopay.sprinkle.entity.Sprinkle;
 import kakaopay.sprinkle.repository.ReceiveRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 받기
+ * 받기 서비스
  *
  * @author najisu
  * @version 2.0
@@ -19,6 +21,9 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class ReceiveService {
+
+    private final RoomJoinService roomJoinService;
+    private final SprinkleService sprinkleService;
 
     private final ReceiveRepository receiveRepository;
 
@@ -51,17 +56,38 @@ public class ReceiveService {
 
     }
 
+    public ReceiveResponse receive(Long userId, Long roomId, String token) {
+
+        // 받기 요청한 유저가 같은방에 있는지
+        roomJoinService.checkJoinedUser(userId, roomId);
+
+        // token으로 뿌리기 데이터 조회
+        Sprinkle sprinkle = sprinkleService.getSprinkleByToken(token);
+
+        // 받기 가능한지 검사
+        sprinkleService.checkCanReceive(userId, roomId, sprinkle);
+
+        // 받기 유저 지정
+        int receiveAmount = setReceiverProcess(sprinkle.getReceiveList(), userId);
+
+        if (receiveAmount == 0) {
+            throw new ReceiveFailedException("해당 뿌리기는 받을 수 있는 금액이 없습니다.");
+        }
+
+        return new ReceiveResponse(userId, receiveAmount);
+    }
+
     /**
+     * 받기 유저 지정 프로세스
+     *
      * @param receiveList 받기 리스트
-     * @param userId      유저 식별값
-     * @return amount 받기 금액
+     * @param userId 받기 유저
+     * @return
      */
-    public int setReceiverProcess(List<Receive> receiveList, Long userId) {
+    private int setReceiverProcess(List<Receive> receiveList, Long userId) {
 
         int receivedAmount = 0;
-        int checkCompleteAmount = 0;
 
-        // Todo 삭제 (stream으로 처리해보고 싶었지만 실패.)
         for (Receive receive : receiveList) {
 
             if (Objects.isNull(receive.getUserId())) {
@@ -69,39 +95,16 @@ public class ReceiveService {
                 receive.updateUserId(userId);
                 receivedAmount = receiveRepository.save(receive).getAmount();
                 break;
+
             } else if (receive.getUserId().equals(userId)) {
                 // userId로 할당된게 있으면
                 throw new ReceiveFailedException("해당 유저는 이미 받은 이력이 존재합니다.");
-            }
 
-            checkCompleteAmount += receive.getAmount();
+            }
         }
 
         return receivedAmount;
     }
-
-//    /**
-//     * 받기 받는사람 지정 프로세스
-//     *
-//     * @param sprinkleId 뿌리기 식별값
-//     * @param userId     유저 식별값
-//     * @return amount 받기 금액
-//     */
-//    public int setReceiverProcess(Long sprinkleId, Long userId) {
-//
-//        // userId가 이미 받기한게 있는지 조회
-//        checkAlreadyReceive(sprinkleId, userId);
-//
-//        // 뿌리기 식별값으로 아직 받지않은 받기 데이터 1개 조회
-//        Receive willSetReceiver = receiveRepository.findTop1ByIdAndUserIdIsNull(sprinkleId).orElseThrow(()
-//                -> new ReceiveFailedException("해당 뿌리기는 모두 받아갔습니다.")
-//        );
-//
-//        willSetReceiver.updateUserId(userId);
-//        Receive receiver = receiveRepository.save(willSetReceiver);
-//
-//        return receiver.getAmount();
-//    }
 
     /**
      * 받기 분할
@@ -111,13 +114,6 @@ public class ReceiveService {
      */
     private int splitReceiveAmount(int remainAmount) {
         return (int) (Math.random() * remainAmount) + 1;
-    }
-
-    public void checkAlreadyReceive(Long sprinkleId, Long userId) {
-
-        receiveRepository.findBySprinkleIdAndUserId(sprinkleId, userId).ifPresent(value -> {
-            throw new ReceiveFailedException("해당 유저는 이미 받기를 했습니다.");
-        });
     }
 
 }
