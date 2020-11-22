@@ -12,10 +12,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v2/sprinkle")
 @RequiredArgsConstructor
 public class SprinkleController {
-
     private final SprinkleService sprinkleService;
 
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<ApiResponse> sprinkle(@RequestHeader(value = "X-USER-ID") Long userId,
                                                 @RequestHeader(value = "X-ROOM-ID") Long roomId,
                                                 @RequestBody SprinkleRequest sprinkleRequest) {
@@ -25,7 +24,7 @@ public class SprinkleController {
         );
     }
 
-    @PatchMapping("")
+    @PatchMapping
     public ResponseEntity<ApiResponse> receive(@RequestHeader(value = "X-USER-ID") Long userId,
                                                @RequestHeader(value = "X-ROOM-ID") Long roomId,
                                                @RequestHeader(value = "TOKEN") String token) {
@@ -35,12 +34,13 @@ public class SprinkleController {
         );
     }
 
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<ApiResponse> inquiry(@RequestHeader(value = "X-USER-ID") Long userId,
+                                               @RequestHeader(value = "X-ROOM-ID") Long roomId,
                                                @RequestHeader(value = "TOKEN") String token) {
 
         return ResponseEntity.status(HttpStatus.OK).body(
-                ApiResponse.success(sprinkleService.inquiry(userId, token))
+                ApiResponse.success(sprinkleService.inquiry(userId, roomId, token))
         );
     }
 

@@ -1,12 +1,14 @@
 package kakaopay.sprinkle.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "RECEIVE")
@@ -23,17 +25,17 @@ public class Receive extends BaseEntity {
     private Long userId;
 
     @Column(name = "amount", nullable = false)
-    private int amount;
+    private BigDecimal amount;
 
     @Column(name = "sprinkle_id", nullable = false)
     private Long sprinkleId;
-    @JsonIgnore
+    
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sprinkle_id", insertable = false, updatable = false)
     private Sprinkle sprinkle;
 
     @Builder
-    public Receive(int amount, Long sprinkleId) {
+    public Receive(BigDecimal amount, Long sprinkleId) {
         this.amount = amount;
         this.sprinkleId = sprinkleId;
     }

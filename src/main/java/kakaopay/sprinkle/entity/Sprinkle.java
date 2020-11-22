@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class Sprinkle extends BaseEntity {
     private Long userId;
 
     @Column(name = "amount", nullable = false)
-    private int amount;
+    private BigDecimal amount;
 
     @Column(name = "number_of_recipients", nullable = false)
     private int numberOfRecipients;
@@ -37,12 +38,13 @@ public class Sprinkle extends BaseEntity {
 
     @Column(name = "token", nullable = false)
     private String token;
+
     @OneToMany(mappedBy = "sprinkle")
     @OrderBy("id desc")
     private List<Receive> receiveList = new ArrayList<>();
 
     @Builder
-    public Sprinkle(Long roomId, Long userId, int amount, int numberOfRecipients, String token) {
+    public Sprinkle(Long roomId, Long userId, BigDecimal amount, int numberOfRecipients, String token) {
         this.roomId = roomId;
         this.userId = userId;
         this.amount = amount;

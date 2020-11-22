@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -25,11 +26,11 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class SprinkleService {
-
     private final RoomJoinService roomJoinService;
     private final ReceiveService receiveService;
-
     private final SprinkleRepository sprinkleRepository;
+
+    private static final int SEVEN_DAYS_MIN = 10080;
 
     /**
      * 신규 뿌리기
@@ -45,10 +46,11 @@ public class SprinkleService {
         // 해당 유저가 해당 채팅방에 있는지
         roomJoinService.checkJoinedUser(userId, roomId);
 
-        String token = TokenUtil.generate();
+        final String token = TokenUtil.generate();
 
         Sprinkle newSprinkle = Sprinkle.builder().roomId(roomId)
                 .userId(userId)
+                .amount(sprinkleRequest.getAmount())
                 .numberOfRecipients(sprinkleRequest.getNumberOfRecipients())
                 .token(token)
                 .build();
@@ -74,17 +76,13 @@ public class SprinkleService {
         roomJoinService.checkJoinedUser(userId, roomId);
 
         // token으로 뿌리기 데이터 조회
-        Sprinkle sprinkle = getSprinkleByToken(token);
+        Sprinkle sprinkle = getSprinkleByToken(token, roomId);
 
         // 받기 가능한지 검사
         checkCanReceive(userId, sprinkle);
 
         // 받기 유저 지정 프로세스
-        int receiveAmount = receiveService.setReceiverProcess(sprinkle.getReceiveList(), userId);
-
-        if (receiveAmount == 0) {
-            throw new ReceiveFailedException("해당 뿌리기는 받을 수 있는 금액이 없습니다.");
-        }
+        BigDecimal receiveAmount = receiveService.setReceiverProcess(sprinkle.getReceiveList(), userId);
 
         return new ReceiveResponse(userId, receiveAmount);
     }
@@ -93,13 +91,14 @@ public class SprinkleService {
      * 뿌리기 조회
      *
      * @param userId 유저 식별값
+     * @param roomId 채팅방 식별값
      * @param token  토큰
      * @return {@link Sprinkle}
      */
     @Transactional(readOnly = true)
-    public Sprinkle inquiry(Long userId, String token) {
+    public Sprinkle inquiry(Long userId, Long roomId, String token) {
 
-        Sprinkle sprinkle = sprinkleRepository.findByToken(token).orElseThrow(()
+        Sprinkle sprinkle = sprinkleRepository.findByTokenAndRoomId(token, roomId).orElseThrow(()
                 -> new EmptyInfoException("해당 토큰의 뿌리기가 존재하지 않습니다.")
         );
 
@@ -109,7 +108,7 @@ public class SprinkleService {
         }
 
         // 뿌린 건에 대한 조회는 7일 동안 할 수 있습니다
-        checkExpired(sprinkle.getCreatedAt(), 10080);
+        checkExpired(sprinkle.getCreatedAt(), SEVEN_DAYS_MIN);
 
         return sprinkle;
     }
@@ -120,9 +119,9 @@ public class SprinkleService {
      * @param token 토큰
      * @return {@link Sprinkle}
      */
-    private Sprinkle getSprinkleByToken(String token) {
+    private Sprinkle getSprinkleByToken(String token, Long roomId) {
 
-        return sprinkleRepository.findByToken(token).orElseThrow(()
+        return sprinkleRepository.findByTokenAndRoomId(token, roomId).orElseThrow(()
                 -> new EmptyInfoException("해당 토큰의 뿌리기 데이터가 존재하지 않습니다.")
         );
     }

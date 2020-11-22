@@ -6,6 +6,8 @@ import kakaopay.sprinkle.repository.ReceiveRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,7 +21,6 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class ReceiveService {
-
     private final ReceiveRepository receiveRepository;
 
     /**
@@ -29,19 +30,18 @@ public class ReceiveService {
      * @param amount             뿌리기 전체금액
      * @param numberOfRecipients 뿌리기 받는 인원 수
      */
-    public void initReceiveInfo(long sprinkleId, int amount, int numberOfRecipients) {
+    public void initReceiveInfo(long sprinkleId, BigDecimal amount, int numberOfRecipients) {
 
-        int total_receive = 0;
+        BigDecimal splitAmount = null;
+        BigDecimal totalReceive = new BigDecimal(0);
 
         for (int i = 0; i < numberOfRecipients; i++) {
 
-            int splitAmount = 0;
-
             if (i != numberOfRecipients - 1) {
-                splitAmount = splitReceiveAmount(amount - total_receive);
-                total_receive += splitAmount;
+                splitAmount = splitReceiveAmount(amount.subtract(totalReceive));
+                totalReceive  = totalReceive.add(splitAmount);
             } else {
-                splitAmount = amount - total_receive;
+                splitAmount = amount.subtract(totalReceive);
             }
 
             receiveRepository.save(
@@ -58,13 +58,14 @@ public class ReceiveService {
      * @param userId      받기 유저
      * @return receivedAmount 받은 금액
      */
-    public int setReceiverProcess(List<Receive> receiveList, Long userId) {
+    @Transactional
+    public BigDecimal setReceiverProcess(List<Receive> receiveList, Long userId) {
 
-        int receivedAmount = 0;
+        BigDecimal receivedAmount = new BigDecimal(0);
 
         for (Receive receive : receiveList) {
 
-            if (Objects.isNull(receive.getUserId())) {
+            if (receive.getUserId() == null) {
                 // 받기 안된거면 유저할당 업데이트
                 receive.updateUserId(userId);
                 receivedAmount = receiveRepository.save(receive).getAmount();
@@ -77,6 +78,10 @@ public class ReceiveService {
             }
         }
 
+        if (receivedAmount.equals(0)) {
+            throw new ReceiveFailedException("해당 뿌리기는 받을 수 있는 금액이 없습니다.");
+        }
+
         return receivedAmount;
     }
 
@@ -86,8 +91,11 @@ public class ReceiveService {
      * @param remainAmount 남은금액
      * @return receiveAmount 받기 분할된 금액
      */
-    private int splitReceiveAmount(int remainAmount) {
-        return (int) (Math.random() * remainAmount) + 1;
+    private BigDecimal splitReceiveAmount(BigDecimal remainAmount) {
+
+        BigDecimal a = remainAmount.multiply(BigDecimal.valueOf(Math.random())).setScale(0, BigDecimal.ROUND_UP);
+
+        return a;
     }
 
 }
