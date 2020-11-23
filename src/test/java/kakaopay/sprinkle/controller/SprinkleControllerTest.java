@@ -33,7 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(SprinkleController.class)
 @AutoConfigureMockMvc
 class SprinkleControllerTest {
-
     @Autowired
     MockMvc mockMvc;
 
