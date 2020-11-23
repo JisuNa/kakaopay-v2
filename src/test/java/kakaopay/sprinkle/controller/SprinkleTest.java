@@ -22,9 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasLength;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -33,22 +31,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(SprinkleController.class)
 @AutoConfigureMockMvc
 class SprinkleTest {
-    @Autowired
-    MockMvc mockMvc;
-
-    @MockBean
-    private SprinkleService sprinkleService;
-
-    ObjectMapper mapper = new ObjectMapper();
-
-    SprinkleRequest sprinkleRequest;
-
     private static final Long ROOM_ID = 1L;
     private static final Long SPRINKLE_USER_ID = 1L;
     private static final Long RECEIVE_USER_ID = 2L;
     private static final String TOKEN = "abc";
     private static final BigDecimal SPRINKLE_AMOUNT = BigDecimal.valueOf(5000);
     private static final BigDecimal RECEIVE_AMOUNT = BigDecimal.valueOf(2000);
+    @Autowired
+    MockMvc mockMvc;
+    ObjectMapper mapper = new ObjectMapper();
+    SprinkleRequest sprinkleRequest;
+    @MockBean
+    private SprinkleService sprinkleService;
 
     @Test
     @DisplayName("뿌리기 성공")
