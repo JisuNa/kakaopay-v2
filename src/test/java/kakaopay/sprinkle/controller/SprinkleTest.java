@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(SprinkleController.class)
 @AutoConfigureMockMvc
-class SprinkleControllerTest {
+class SprinkleTest {
     @Autowired
     MockMvc mockMvc;
 
@@ -78,6 +78,7 @@ class SprinkleControllerTest {
     @DisplayName("받기 성공")
     public void receiveTest() throws Exception {
         // given
+        sprinkle();
         receive();
 
         // when
@@ -94,7 +95,7 @@ class SprinkleControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.code").value(Code.SUCCESS.getCode()))
                 .andExpect(jsonPath("$.data.userId").value(RECEIVE_USER_ID))
-                .andExpect(jsonPath("$.data.amount").value(RECEIVE_AMOUNT));
+                .andExpect(jsonPath("$.data.amount").isNotEmpty();
     }
 
     @Test
@@ -119,12 +120,12 @@ class SprinkleControllerTest {
                 .andExpect(jsonPath("$.data.sprinkledAmount").value(SPRINKLE_AMOUNT))
                 .andExpect(jsonPath("$.data.receivedAmount").value(RECEIVE_AMOUNT))
                 .andExpect(jsonPath("$.data.receivedInfo[0].userId").value(RECEIVE_USER_ID))
-                .andExpect(jsonPath("$.data.receivedInfo[0].amount").value(RECEIVE_AMOUNT))
+                .andExpect(jsonPath("$.data.receivedInfo[0].amount").isNotEmpty()
         ;
     }
 
     private void sprinkle() {
-        sprinkleRequest = new SprinkleRequest(BigDecimal.valueOf(5000), 3);
+        sprinkleRequest = new SprinkleRequest(SPRINKLE_AMOUNT, 3);
         SprinkleResponse sprinkleResponse = SprinkleResponse.builder().userId(SPRINKLE_USER_ID).roomId(ROOM_ID).token(TOKEN).build();
 
         given(sprinkleService.newSprinkle(anyLong(), anyLong(), Mockito.any(SprinkleRequest.class))).willReturn(sprinkleResponse);
@@ -144,4 +145,20 @@ class SprinkleControllerTest {
         InquiryResponse inquiryResponse = InquiryResponse.builder().sprinkledAmount(SPRINKLE_AMOUNT).receivedAmount(RECEIVE_AMOUNT).receivedInfo(receiveResponseList).build();
         given(sprinkleService.inquiry(SPRINKLE_USER_ID, ROOM_ID, TOKEN)).willReturn(inquiryResponse);
     }
+
+    // # 뿌리기
+    // 채팅방에 없는 경우
+
+    // # 받기
+    // 받기 성공
+    // 채팅방에 없는 경우
+    // 뿌린사람이 받기 요청한 경우
+    // 토큰 10분이 지나 만료됐을 경우
+    // 요청한 유저가 받은 이력이 있는 경우
+    // 받기할 수 있는게 없는 경우
+
+    // # 조회
+    // 조회성공
+    // 뿌리기한 유저가 조회한게 아닌 경우
+    // 토큰이 7일이 지나 만료됐을 경우
 }
