@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 @Getter
 @NoArgsConstructor
 public class SprinkleRequest {
-
     private BigDecimal amount;
     private int numberOfRecipients;
 
@@ -16,5 +15,4 @@ public class SprinkleRequest {
         this.amount = amount;
         this.numberOfRecipients = numberOfRecipients;
     }
-
 }

@@ -2,6 +2,7 @@ package kakaopay.sprinkle.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kakaopay.sprinkle.dto.SprinkleRequest;
+import kakaopay.sprinkle.dto.SprinkleResponse;
 import kakaopay.sprinkle.service.SprinkleService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -11,6 +12,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.math.BigDecimal;
 
 import static org.hamcrest.Matchers.hasLength;
 import static org.hamcrest.Matchers.hasSize;
@@ -85,9 +88,11 @@ class SprinkleControllerTest {
 
     private void sprinkle() {
 
-        sprinkleRequest = new SprinkleRequest(5000, 3);
+        sprinkleRequest = new SprinkleRequest(BigDecimal.valueOf(5000), 3);
 
-        given(sprinkleService.newSprinkle(anyLong(), anyLong(), Mockito.any(SprinkleRequest.class))).willReturn(token);
+        SprinkleResponse sprinkleResponse = SprinkleResponse.builder().userId(anyLong()).roomId(anyLong()).token(token).build();
+
+        given(sprinkleService.newSprinkle(anyLong(), anyLong(), Mockito.any(SprinkleRequest.class))).willReturn(sprinkleResponse);
 
     }
 

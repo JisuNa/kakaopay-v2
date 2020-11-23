@@ -6,8 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface SprinkleRepository extends JpaRepository<Sprinkle, Long> {
-
-    Sprinkle findByRoomId(long roomId);
-
     Optional<Sprinkle> findByTokenAndRoomId(String token, Long roomId);
 }

@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -25,7 +26,8 @@ public class Receive extends BaseEntity {
     private Long userId;
 
     @Column(name = "amount", nullable = false)
-    private BigDecimal amount;
+    @ColumnDefault("0")
+    private BigDecimal amount = BigDecimal.ZERO;
 
     @Column(name = "sprinkle_id", nullable = false)
     private Long sprinkleId;

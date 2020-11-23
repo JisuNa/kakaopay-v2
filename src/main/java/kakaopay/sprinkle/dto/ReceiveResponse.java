@@ -1,19 +1,16 @@
 package kakaopay.sprinkle.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Getter
-@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ReceiveResponse {
-
-    private Long userId;
-    private BigDecimal amount;
-
-    public ReceiveResponse(Long userId, BigDecimal amount) {
-        this.userId = userId;
-        this.amount = amount;
-    }
+    private final Long userId;
+    private final BigDecimal amount;
 }

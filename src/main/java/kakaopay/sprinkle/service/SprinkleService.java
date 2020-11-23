@@ -5,8 +5,11 @@ import kakaopay.sprinkle.common.error.exception.ExpiredTokenException;
 import kakaopay.sprinkle.common.error.exception.NotSprinklerInquiryException;
 import kakaopay.sprinkle.common.error.exception.ReceiveFailedException;
 import kakaopay.sprinkle.common.util.TokenUtil;
+import kakaopay.sprinkle.dto.InquiryResponse;
 import kakaopay.sprinkle.dto.ReceiveResponse;
 import kakaopay.sprinkle.dto.SprinkleRequest;
+import kakaopay.sprinkle.dto.SprinkleResponse;
+import kakaopay.sprinkle.entity.Receive;
 import kakaopay.sprinkle.entity.Sprinkle;
 import kakaopay.sprinkle.repository.SprinkleRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 뿌리기
@@ -26,11 +32,10 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class SprinkleService {
+    private static final int SEVEN_DAYS_MIN = 10080;
     private final RoomJoinService roomJoinService;
     private final ReceiveService receiveService;
     private final SprinkleRepository sprinkleRepository;
-
-    private static final int SEVEN_DAYS_MIN = 10080;
 
     /**
      * 신규 뿌리기
@@ -38,10 +43,10 @@ public class SprinkleService {
      * @param userId          유저 식별값
      * @param roomId          채팅방 식별값
      * @param sprinkleRequest 뿌리기
-     * @return token 토큰
+     * @return {@link SprinkleResponse}
      */
     @Transactional
-    public String newSprinkle(Long userId, Long roomId, SprinkleRequest sprinkleRequest) {
+    public SprinkleResponse newSprinkle(Long userId, Long roomId, SprinkleRequest sprinkleRequest) {
 
         // 해당 유저가 해당 채팅방에 있는지
         roomJoinService.checkJoinedUser(userId, roomId);
@@ -59,7 +64,7 @@ public class SprinkleService {
 
         receiveService.initReceiveInfo(savedSprinkle.getId(), sprinkleRequest.getAmount(), sprinkleRequest.getNumberOfRecipients());
 
-        return token;
+        return SprinkleResponse.builder().userId(userId).roomId(roomId).token(token).build();
     }
 
     /**
@@ -72,16 +77,12 @@ public class SprinkleService {
      */
     public ReceiveResponse receive(Long userId, Long roomId, String token) {
 
-        // 받기 요청한 유저가 뿌리기한 방에 있는지
         roomJoinService.checkJoinedUser(userId, roomId);
 
-        // token으로 뿌리기 데이터 조회
         Sprinkle sprinkle = getSprinkleByToken(token, roomId);
 
-        // 받기 가능한지 검사
         checkCanReceive(userId, sprinkle);
 
-        // 받기 유저 지정 프로세스
         BigDecimal receiveAmount = receiveService.setReceiverProcess(sprinkle.getReceiveList(), userId);
 
         updateSprayedAmount(sprinkle, receiveAmount);
@@ -98,21 +99,19 @@ public class SprinkleService {
      * @return {@link Sprinkle}
      */
     @Transactional(readOnly = true)
-    public Sprinkle inquiry(Long userId, Long roomId, String token) {
+    public InquiryResponse inquiry(Long userId, Long roomId, String token) {
 
-        Sprinkle sprinkle = sprinkleRepository.findByTokenAndRoomId(token, roomId).orElseThrow(()
-                -> new EmptyInfoException("해당 토큰의 뿌리기가 존재하지 않습니다.")
-        );
+        Sprinkle sprinkle = getSprinkleByToken(token, roomId);
 
-        // 뿌린 사람 자신만 조회를 할 수 있습니다.
-        if (!userId.equals(sprinkle.getUserId())) {
-            throw new NotSprinklerInquiryException("뿌리기한 유저만 조회가 가능합니다.");
-        }
+        checkSprinkleUserInquiry(userId, sprinkle.getUserId());
 
-        // 뿌린 건에 대한 조회는 7일 동안 할 수 있습니다
         checkExpired(sprinkle.getCreatedAt(), SEVEN_DAYS_MIN);
 
-        return sprinkle;
+        List<ReceiveResponse> receivedInfo = manufacturingInquiryReceivedInfo(sprinkle.getReceiveList());
+
+        return InquiryResponse.builder().sprinkledAt(sprinkle.getCreatedAt())
+                .sprinkledAmount(sprinkle.getAmount())
+                .receivedAmount(sprinkle.getSprayedAmount()).receivedInfo(receivedInfo).build();
     }
 
     /**
@@ -136,12 +135,8 @@ public class SprinkleService {
      */
     private void checkCanReceive(Long userId, Sprinkle sprinkle) {
 
-        // 뿌리기한 사람이 요청한건지
-        if (sprinkle.getUserId().equals(userId)) {
-            throw new ReceiveFailedException("뿌리기를 한 사람은 받기를 할 수 없습니다.");
-        }
+        checkSprinkleUserReceive(userId, sprinkle.getUserId());
 
-        // 뿌리기하고 10분이 지났는지
         checkExpired(sprinkle.getCreatedAt(), 10);
     }
 
@@ -158,9 +153,57 @@ public class SprinkleService {
         }
     }
 
+    /**
+     * 뿌려진 금액 업데이트
+     *
+     * @param sprinkle      뿌리기 정보
+     * @param sprayedAmount 받기 금액
+     */
     private void updateSprayedAmount(Sprinkle sprinkle, BigDecimal sprayedAmount) {
         sprinkle.updateSprayedAmount(sprayedAmount.add(sprinkle.getSprayedAmount()));
         sprinkleRepository.save(sprinkle);
+    }
+
+    /**
+     * 뿌린 사람 자신이 조회한건지 체크
+     *
+     * @param requestUserId 조회 요청한 유저 식별값
+     * @param sprinkleUserId 뿌리기 유저 식별값
+     */
+    private void checkSprinkleUserInquiry(Long requestUserId, Long sprinkleUserId) {
+        if (!requestUserId.equals(sprinkleUserId)) {
+            throw new NotSprinklerInquiryException("뿌리기한 유저만 조회가 가능합니다.");
+        }
+    }
+
+    /**
+     * 뿌린 사람 자신이 받기하는지 체크
+     *
+     * @param requestUserId 받기 요청한 유저 식별값
+     * @param sprinkleUserId 뿌리기 유저 식별값
+     */
+    private void checkSprinkleUserReceive(Long requestUserId, Long sprinkleUserId) {
+        if (requestUserId.equals(sprinkleUserId)) {
+            throw new ReceiveFailedException("뿌리기를 한 사람은 받기를 할 수 없습니다.");
+        }
+    }
+
+    /**
+     * 조회 받기 완료된 정보 가공
+     *
+     * @param receiveList 받기 정보
+     * @return {@link ReceiveResponse}
+     */
+    private List<ReceiveResponse> manufacturingInquiryReceivedInfo(List<Receive> receiveList) {
+        List<ReceiveResponse> receivedInfoList = new ArrayList<>();
+
+        for (Receive receive : receiveList) {
+            if (receive.getUserId() != null) {
+                ReceiveResponse receiveInfo = ReceiveResponse.builder().userId(receive.getUserId()).amount(receive.getAmount()).build();
+                receivedInfoList.add(receiveInfo);
+            }
+        }
+        return receivedInfoList;
     }
 
 }

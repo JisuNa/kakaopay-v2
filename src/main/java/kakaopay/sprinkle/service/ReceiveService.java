@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 받기 서비스
@@ -32,10 +31,10 @@ public class ReceiveService {
      */
     public void initReceiveInfo(long sprinkleId, BigDecimal amount, int numberOfRecipients) {
 
-        BigDecimal splitAmount = null;
         BigDecimal totalReceive = new BigDecimal(0);
 
         for (int i = 0; i < numberOfRecipients; i++) {
+            BigDecimal splitAmount;
 
             if (i != numberOfRecipients - 1) {
                 splitAmount = splitReceiveAmount(amount.subtract(totalReceive));
@@ -66,19 +65,16 @@ public class ReceiveService {
         for (Receive receive : receiveList) {
 
             if (receive.getUserId() == null) {
-                // 받기 안된거면 유저할당 업데이트
                 receive.updateUserId(userId);
                 receivedAmount = receiveRepository.save(receive).getAmount();
                 break;
 
             } else if (receive.getUserId().equals(userId)) {
-                // userId로 할당된게 있으면
                 throw new ReceiveFailedException("해당 유저는 이미 받은 이력이 존재합니다.");
-
             }
         }
 
-        if (receivedAmount.equals(0)) {
+        if (receivedAmount.equals(BigDecimal.ZERO)) {
             throw new ReceiveFailedException("해당 뿌리기는 받을 수 있는 금액이 없습니다.");
         }
 
@@ -92,10 +88,7 @@ public class ReceiveService {
      * @return receiveAmount 받기 분할된 금액
      */
     private BigDecimal splitReceiveAmount(BigDecimal remainAmount) {
-
-        BigDecimal a = remainAmount.multiply(BigDecimal.valueOf(Math.random())).setScale(0, BigDecimal.ROUND_UP);
-
-        return a;
+        return remainAmount.multiply(BigDecimal.valueOf(Math.random())).setScale(0, BigDecimal.ROUND_UP);
     }
 
 }

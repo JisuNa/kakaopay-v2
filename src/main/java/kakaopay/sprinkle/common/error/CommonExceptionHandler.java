@@ -13,18 +13,18 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class CommonExceptionHandler {
 
-//    @ExceptionHandler({})
-//    protected ResponseEntity<ErrorResponse> badRequestException(Exception e) {
-//
-//        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                .body(ErrorResponse.builder()
-//                        .code(Code.ERROR0001.getCode())
-//                        .message(e.getMessage())
-//                        .build()
-//        );
-//    }
+    @ExceptionHandler({ReceiveFailedException.class, NotSprinklerInquiryException.class, ExpiredTokenException.class})
+    protected ResponseEntity<ErrorResponse> badRequestException(Exception e) {
 
-    @ExceptionHandler({EmptyInfoException.class, ReceiveFailedException.class, NotSprinklerInquiryException.class, ExpiredTokenException.class})
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.builder()
+                        .code(Code.ERROR0001.getCode())
+                        .message(e.getMessage())
+                        .build()
+        );
+    }
+
+    @ExceptionHandler({EmptyInfoException.class})
     protected ResponseEntity<ErrorResponse> notFoundException(Exception e) {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)

@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -28,20 +29,22 @@ public class Sprinkle extends BaseEntity {
     private Long userId;
 
     @Column(name = "amount", nullable = false)
-    private BigDecimal amount;
+    @ColumnDefault("0")
+    private BigDecimal amount = BigDecimal.ZERO;
 
     @Column(name = "number_of_recipients", nullable = false)
     private int numberOfRecipients;
 
     @Column(name = "sprayed_amount")
-    private BigDecimal sprayedAmount;
+    @ColumnDefault("0")
+    private BigDecimal sprayedAmount = BigDecimal.ZERO;
 
     @Column(name = "token", nullable = false)
     private String token;
 
     @OneToMany(mappedBy = "sprinkle")
     @OrderBy("id asc")
-    private List<Receive> receiveList = new ArrayList<>();
+    private final List<Receive> receiveList = new ArrayList<>();
 
     @Builder
     public Sprinkle(Long roomId, Long userId, BigDecimal amount, int numberOfRecipients, String token) {
