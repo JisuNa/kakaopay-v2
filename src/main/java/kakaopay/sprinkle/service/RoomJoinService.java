@@ -11,7 +11,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class RoomJoinService {
-
     private final RoomJoinRepository roomJoinRepository;
 
     /**

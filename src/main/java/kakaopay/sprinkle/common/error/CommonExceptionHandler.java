@@ -2,6 +2,7 @@ package kakaopay.sprinkle.common.error;
 
 import kakaopay.sprinkle.common.constant.Code;
 import kakaopay.sprinkle.common.error.exception.EmptyInfoException;
+import kakaopay.sprinkle.common.error.exception.ExpiredTokenException;
 import kakaopay.sprinkle.common.error.exception.NotSprinklerInquiryException;
 import kakaopay.sprinkle.common.error.exception.ReceiveFailedException;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class CommonExceptionHandler {
 //        );
 //    }
 
-    @ExceptionHandler({EmptyInfoException.class, ReceiveFailedException.class, NotSprinklerInquiryException.class})
+    @ExceptionHandler({EmptyInfoException.class, ReceiveFailedException.class, NotSprinklerInquiryException.class, ExpiredTokenException.class})
     protected ResponseEntity<ErrorResponse> notFoundException(Exception e) {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)

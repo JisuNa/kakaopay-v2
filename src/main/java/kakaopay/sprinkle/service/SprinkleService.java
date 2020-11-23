@@ -84,6 +84,8 @@ public class SprinkleService {
         // 받기 유저 지정 프로세스
         BigDecimal receiveAmount = receiveService.setReceiverProcess(sprinkle.getReceiveList(), userId);
 
+        updateSprayedAmount(sprinkle, receiveAmount);
+
         return new ReceiveResponse(userId, receiveAmount);
     }
 
@@ -154,6 +156,11 @@ public class SprinkleService {
         if (createdAt.isBefore(LocalDateTime.now().minusMinutes(min))) {
             throw new ExpiredTokenException("사용할 수 없는 토큰 입니다.");
         }
+    }
+
+    private void updateSprayedAmount(Sprinkle sprinkle, BigDecimal sprayedAmount) {
+        sprinkle.updateSprayedAmount(sprayedAmount.add(sprinkle.getSprayedAmount()));
+        sprinkleRepository.save(sprinkle);
     }
 
 }

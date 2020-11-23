@@ -27,7 +27,7 @@ public class SprinkleController {
     @PatchMapping
     public ResponseEntity<ApiResponse> receive(@RequestHeader(value = "X-USER-ID") Long userId,
                                                @RequestHeader(value = "X-ROOM-ID") Long roomId,
-                                               @RequestHeader(value = "TOKEN") String token) {
+                                               @RequestHeader(value = "X-TOKEN") String token) {
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success(sprinkleService.receive(userId, roomId, token))
@@ -37,7 +37,7 @@ public class SprinkleController {
     @GetMapping
     public ResponseEntity<ApiResponse> inquiry(@RequestHeader(value = "X-USER-ID") Long userId,
                                                @RequestHeader(value = "X-ROOM-ID") Long roomId,
-                                               @RequestHeader(value = "TOKEN") String token) {
+                                               @RequestHeader(value = "X-TOKEN") String token) {
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success(sprinkleService.inquiry(userId, roomId, token))

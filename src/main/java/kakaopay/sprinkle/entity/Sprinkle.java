@@ -34,13 +34,13 @@ public class Sprinkle extends BaseEntity {
     private int numberOfRecipients;
 
     @Column(name = "sprayed_amount")
-    private int sprayedAmount;
+    private BigDecimal sprayedAmount;
 
     @Column(name = "token", nullable = false)
     private String token;
 
     @OneToMany(mappedBy = "sprinkle")
-    @OrderBy("id desc")
+    @OrderBy("id asc")
     private List<Receive> receiveList = new ArrayList<>();
 
     @Builder
@@ -50,6 +50,10 @@ public class Sprinkle extends BaseEntity {
         this.amount = amount;
         this.numberOfRecipients = numberOfRecipients;
         this.token = token;
+    }
+
+    public void updateSprayedAmount(BigDecimal sprayedAmount) {
+        this.sprayedAmount = sprayedAmount;
     }
 
 }
